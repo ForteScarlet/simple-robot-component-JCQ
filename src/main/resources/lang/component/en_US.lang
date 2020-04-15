@@ -1,0 +1,8 @@
+# 送信失败
+exception.JCQSender.failed=Delivery failed! Status code: {0} Information: {1}
+# after
+run.after=simple-JCQ has been successfully initialized
+run.enable=simple-JCQ is enabled
+run.disable=simple-JCQ is disabled
+run.startup=Cool Q has started
+run.exit=Cool Q has been terminated
