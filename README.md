@@ -8,11 +8,11 @@
 
 *****
 
-**文档首页**：[JCQ组件](./前言.md)
+**文档首页**：[JCQ组件](https://www.kancloud.cn/forte-scarlet/simple-coolq-doc/1638828)
 　
 *****
 
-**JCQ组件 快速开始**：[JCQ组件-快速开始](./组件-酷QQQ-JCQ/快速开始.md)
+**JCQ组件 快速开始**：[JCQ组件-快速开始](https://www.kancloud.cn/forte-scarlet/simple-coolq-doc/1638829)
 
 *****
 
