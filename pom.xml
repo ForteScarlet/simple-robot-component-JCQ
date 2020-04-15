@@ -4,9 +4,17 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>org.sonatype.oss</groupId>
+        <artifactId>oss-parent</artifactId>
+        <version>7</version>
+    </parent>
+
     <groupId>io.github.fortescarlet.simple-robot-component</groupId>
     <artifactId>component-jcq</artifactId>
-    <version>0.1</version>
+
+    <!-- 版本号 下次部署大于0.1-1.11 2020/4/15 -->
+    <version>0.1-1.11</version>
 
     <properties>
         <kotlin.version>1.3.70</kotlin.version>
@@ -61,14 +69,12 @@
         </dependency>
     </dependencies>
 
+    <scm>
+        <url>https://github.com/ForteScarlet/simple-robot-component-JCQ</url>
+    </scm>
+
     <build>
-        <!-- 此处填写打包后的jar文件名 -->
-        <finalName>${groupId}.${artifactId}</finalName>
-
-        <!-- 将依赖包输出到 target\lib 中, 将lib目录复制到插件 同名文件夹下 即可导入依赖 -->
         <plugins>
-
-
             <!-- kt & java -->
             <!-- java 版本 -->
             <plugin>
@@ -134,6 +140,86 @@
                     <jvmTarget>1.8</jvmTarget>
                 </configuration>
             </plugin>
+            <!-- maven仓库相关插件 -->
+            <!-- (1) deploy插件 -->
+            <plugin>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>2.8.2</version>
+                <executions>
+                    <execution>
+                        <id>default-deploy</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>deploy</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- （2）sonatype的staging插件 -->
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.7</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>oss</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+
+            <!-- （3）SCM插件 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-scm-plugin</artifactId>
+                <version>1.8.1</version>
+            </plugin>
+
+            <!-- （4）release插件，下面checkModificationExcludes是排除一些目录文件不要发布。 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.3</version>
+                <configuration>
+                    <mavenExecutorId>forked-path</mavenExecutorId>
+                    <useReleaseProfile>false</useReleaseProfile>
+                    <arguments>-Psonatype-oss-release</arguments>
+                    <pushChanges>false</pushChanges>
+                    <localCheckout>false</localCheckout>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                    <checkModificationExcludes>
+                        <checkModificationExclude>.idea/</checkModificationExclude>
+                        <checkModificationExclude>.idea/*</checkModificationExclude>
+                        <checkModificationExclude>test/</checkModificationExclude>
+                        <checkModificationExclude>test/*</checkModificationExclude>
+                        <checkModificationExclude>.idea/libraries/*</checkModificationExclude>
+                        <checkModificationExclude>pom.xml</checkModificationExclude>
+                        <checkModificationExclude>release-pom.xml</checkModificationExclude>
+
+                        <checkModificationExclude>jdonframework.iml</checkModificationExclude>
+                        <checkModificationExclude>JdonAccessory/jdon-hibernate3x/jdon-hibernate3x.iml
+                        </checkModificationExclude>
+                        <checkModificationExclude>JdonAccessory/jdon-jdbc/jdon-jdbc.iml</checkModificationExclude>
+                        <checkModificationExclude>JdonAccessory/jdon-remote/jdon-remote.iml</checkModificationExclude>
+                        <checkModificationExclude>JdonAccessory/jdon-struts1x/jdon-struts1x.iml
+                        </checkModificationExclude>
+                    </checkModificationExcludes>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-scm-plugin</artifactId>
+                        <version>1.8.1</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+            <!--
+            第2步：生成Javadoc和Source jar文件，您必须配置javadoc和源Maven插件。
+            在pom.xml的build一级目录下的plugins里面加入下面：
+            -->
+            <!-- java 版本 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -146,7 +232,142 @@
                     </compilerArgs>
                 </configuration>
             </plugin>
+
+            <!-- java源码 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.0.0</version>
+                <configuration>
+                    <attach>true</attach>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+
+
+            <!-- javadoc -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.9.1</version>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                    <aggregate>true</aggregate>
+                    <charset>UTF-8</charset>
+                    <docencoding>UTF-8</docencoding>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <additionalparam>-Xdoclint:none</additionalparam>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!--
+            第3步：进行GPG签名加密，
+            这是对生成的jar包，javadoc包等进行签名加密，
+            保证你的文件上传到服务器过程中不会被拦截和破解安全，服务器那边使用你提供的密钥对进行解密。
+            在pom.xml的build一级目录下的plugins里面加入下面：
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
+
+    <!-- maven相关配置 -->
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+
+    <!-- 开发者信息 -->
+    <developers>
+        <developer>
+            <roles>
+                <role>a single programmer</role>
+            </roles>
+            <name>ForteScarlet</name>
+            <!-- 项目开发者的email -->
+            <email>ForteScarlet@163.com</email>
+        </developer>
+    </developers>
+
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>oss</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>oss</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+
+
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <version>1.6.7</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <serverId>oss</serverId>
+                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.5</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 
 </project>
