@@ -8,11 +8,15 @@
 
 *****
 
-**文档首页**：[JCQ组件](https://www.kancloud.cn/forte-scarlet/simple-coolq-doc/1638828)
+**文档首页**：[JCQ组件](http://simple-robot-doc.forte.love/1638828)
 　
+如果无法跳转，请尝试
+[原文档 http://simple-robot-doc.forte.love/](http://simple-robot-doc.forte.love/) -> `组件-酷Q-JCQ` -> `快速开始` 处阅读
+或
+[https://www.kancloud.cn/forte-scarlet/simple-coolq-doc/](https://www.kancloud.cn/forte-scarlet/simple-coolq-doc/) -> `组件-酷Q-JCQ` -> `快速开始` 处阅读
 *****
 
-**JCQ组件 快速开始**：[JCQ组件-快速开始](https://www.kancloud.cn/forte-scarlet/simple-coolq-doc/1638829)
+**JCQ组件 快速开始**：[JCQ组件-快速开始](http://simple-robot-doc.forte.love/1638829)
 
 *****
 
