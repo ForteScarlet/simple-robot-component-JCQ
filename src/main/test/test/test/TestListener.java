@@ -16,5 +16,9 @@ public class TestListener {
     public void testListener(MsgGet msg){
         System.out.println(msg);
     }
+    @Listen(MsgGetTypes.groupBan)
+    public void testListener2(MsgGet msg){
+        System.out.println(msg);
+    }
 
 }
