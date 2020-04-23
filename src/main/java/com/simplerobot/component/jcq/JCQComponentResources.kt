@@ -12,8 +12,8 @@ import com.forte.qqrobot.depend.DependCenter
 import com.forte.qqrobot.sender.MsgSender
 import com.forte.qqrobot.sender.senderlist.BaseRootSenderList
 import com.forte.qqrobot.utils.CQCodeUtil
-import com.sobte.cqp.jcq.entity.*
-import com.sobte.cqp.jcq.event.JcqApp
+import org.meowy.cqp.jcq.entity.*
+import org.meowy.cqp.jcq.event.JcqApp
 
 /*
     扩展函数
@@ -76,22 +76,21 @@ object JCQBotAppImpl : JCQBotApp {
  * JCQ context对象
  */
 open class JCQContext
-@JvmOverloads
 constructor(
-        sender: JCQSender,
+        val realSender: JCQSender,
         manager: BotManager,
         msgParser: MsgParser,
         processor: MsgProcessor,
         dependCenter: DependCenter,
         // CoolQ对象
-        val cq: CoolQ = JcqApp.CQ
-) : SimpleRobotContext<JCQSender, JCQSender, JCQSender>(sender, sender, sender, manager, msgParser, processor, dependCenter)
+        val cq: CoolQ
+) : SimpleRobotContext<JCQSender, JCQSender, JCQSender>(realSender, realSender, realSender, manager, msgParser, processor, dependCenter)
 
 
 /**
  * JCQBotInfo
  */
-open class JCQBotInfo(info: LoginInfo, botSender: BotSender, cq: CoolQ = JcqApp.CQ) : BotInfoImpl(info.code, cq.appDirectory, info, botSender)
+open class JCQBotInfo(info: LoginInfo, botSender: BotSender, cq: CoolQ) : BotInfoImpl(info.code, cq.appDirectory, info, botSender)
 
 
 /**
@@ -100,32 +99,30 @@ open class JCQBotInfo(info: LoginInfo, botSender: BotSender, cq: CoolQ = JcqApp.
  * CQ全局唯一，这个类基本上也可以算是全局唯一了
  */
 open class JCQSender
-@JvmOverloads
-constructor(private val cq: CoolQ = JcqApp.CQ) : BaseRootSenderList() {
+constructor(val cq: CoolQ) : BaseRootSenderList() {
 
-    companion object {
-        /** 登录信息, 唯一 */
+    // 登录信息不再使用静态
+//    companion object {
+        /** 登录信息 */
         private lateinit var _loginInfo: LoginInfo
-        @JvmStatic
         val loginInfo: LoginInfo
             get() {
                 if (!::_loginInfo.isInitialized) {
-                    _loginInfo = JCQLoginInfo(JcqApp.CQ.loginNick, JcqApp.CQ.loginQQ)
+                    _loginInfo = JCQLoginInfo(cq.loginNick, cq.loginQQ)
                 }
                 return _loginInfo
             }
 
-        /** 登录信息, 唯一 */
+        /** app目录 */
         private lateinit var _appDirectory: String
-        @JvmStatic
         val appDir: String
             get() {
                 if (!::_appDirectory.isInitialized) {
-                    _appDirectory = JcqApp.CQ.appDirectory
+                    _appDirectory = cq.appDirectory
                 }
                 return _appDirectory
             }
-    }
+//    }
 
     /**
      * 发送讨论组消息

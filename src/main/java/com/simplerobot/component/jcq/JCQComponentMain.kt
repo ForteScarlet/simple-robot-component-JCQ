@@ -12,8 +12,7 @@ import com.forte.qqrobot.depend.DependCenter
 import com.forte.qqrobot.listener.invoker.ListenerManager
 import com.forte.qqrobot.sender.MsgSender
 import com.forte.qqrobot.sender.senderlist.RootSenderList
-import com.sobte.cqp.jcq.entity.CoolQ
-import com.sobte.cqp.jcq.event.JcqApp
+import org.meowy.cqp.jcq.entity.CoolQ
 import java.util.function.Function
 
 /**
@@ -21,7 +20,7 @@ import java.util.function.Function
  */
 open class JCQApplication(
         // 启动时的唯一CoolQ对象
-        private val cq: CoolQ = JcqApp.CQ
+        private val cq: CoolQ
 ) : BaseApplication<
         JCQConfiguration,
         JCQSender,
@@ -100,7 +99,7 @@ open class JCQApplication(
     /**
      * 验证？验证个锤子啊
      */
-    override fun verifyBot(code: String?, info: BotInfo?): BotInfo = JCQBotInfo(sender.loginQQInfo, BotSender(sender))
+    override fun verifyBot(code: String?, info: BotInfo?): BotInfo = JCQBotInfo(sender.loginQQInfo, BotSender(sender), cq)
 
 
     /** 延迟初始化 默认送信器 */

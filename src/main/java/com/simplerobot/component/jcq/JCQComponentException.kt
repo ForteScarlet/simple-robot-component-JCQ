@@ -1,7 +1,7 @@
 package com.simplerobot.component.jcq
 
 import com.forte.qqrobot.exception.RobotRuntimeException
-import com.sobte.cqp.jcq.entity.CQStatus
+import org.meowy.cqp.jcq.entity.CQStatus
 
 
 /**
