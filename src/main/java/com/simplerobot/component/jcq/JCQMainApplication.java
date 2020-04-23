@@ -11,6 +11,5 @@ import java.time.Instant;
 public abstract class JCQMainApplication extends JCQMain {
     public JCQMainApplication(CoolQ cq) {
         super(cq);
-        long time = Instant.now().plusSeconds(60).toEpochMilli();
     }
 }
