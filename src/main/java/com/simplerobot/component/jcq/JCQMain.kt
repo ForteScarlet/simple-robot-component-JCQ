@@ -4,6 +4,7 @@ import com.forte.lang.Language
 import com.forte.plusutils.consoleplus.FortePlusPrintStream
 import com.forte.qqrobot.MsgProcessor
 import com.forte.qqrobot.listener.result.ListenResult
+import com.forte.qqrobot.log.LogLevel
 import com.forte.qqrobot.log.QQLog
 import com.forte.qqrobot.sender.MsgSender
 import com.forte.qqrobot.utils.CQCodeUtil
@@ -53,7 +54,16 @@ object Lang {
 /**
  * 测试用的启动器类
  */
-abstract class DebugJCQMain : JCQMain(CQDebug.getInstance())
+abstract class DebugJCQMain : JCQMain(CQDebug.getInstance()){
+    /**
+     * 启动器前置配置工作，默认以当前主类所在位置进行扫描
+     * 可重写此方法以实现自定义配置
+     */
+    override fun beforeStart(conf: JCQConfiguration) {
+        // debug中日志也设置为debug
+        conf.logLevel = LogLevel.DEBUG
+    }
+}
 
 /**
  * JCQ主启动类, 作为抽象类使用
@@ -75,17 +85,28 @@ abstract class JCQMain(CQ: CoolQ) : JcqAppAbstract(CQ), ICQVer, IMsg, IRequest, 
      * 启动器前置配置工作，默认以当前主类所在位置进行扫描
      * 可重写此方法以实现自定义配置
      */
-    override fun before(conf: JCQConfiguration) {
+    final override fun before(conf: JCQConfiguration) {
         conf.setScannerPackage(this::class.java.`package`.name)
+        // jcq下检测bot注册意义不大
+        conf.botCheck = false
+        beforeStart(conf)
     }
+
+    /**
+     * 可重写
+     */
+    open fun beforeStart(conf: JCQConfiguration){ /* for user override */ }
 
     /**
      * 启动器启动后的操作
      * 打印一句日志
      */
-    override fun after(cqCodeUtil: CQCodeUtil, sender: MsgSender) {
+    final override fun after(cqCodeUtil: CQCodeUtil, sender: MsgSender) {
         JCQLog.info((Lang by "run.after"))
+        afterStart(cqCodeUtil, sender)
     }
+
+    open fun afterStart(cqCodeUtil: CQCodeUtil, sender: MsgSender){ /* for user override */ }
 
     /** 延迟初始化 app目录 */
     lateinit var appDirectory: String private set
