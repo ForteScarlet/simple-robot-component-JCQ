@@ -3,7 +3,6 @@ package com.simplerobot.component.jcq.log
 import com.forte.lang.Language
 import com.simplerobot.component.jcq.JCQMain
 import org.meowy.cqp.jcq.entity.CoolQ
-import org.meowy.cqp.jcq.event.JcqApp
 import sun.reflect.Reflection
 
 

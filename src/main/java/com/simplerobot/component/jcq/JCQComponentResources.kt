@@ -13,7 +13,6 @@ import com.forte.qqrobot.sender.MsgSender
 import com.forte.qqrobot.sender.senderlist.BaseRootSenderList
 import com.forte.qqrobot.utils.CQCodeUtil
 import org.meowy.cqp.jcq.entity.*
-import org.meowy.cqp.jcq.event.JcqApp
 
 /*
     扩展函数

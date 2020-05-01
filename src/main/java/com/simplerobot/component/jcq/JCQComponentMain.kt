@@ -1,7 +1,6 @@
 package com.simplerobot.component.jcq
 
 import com.forte.qqrobot.BaseApplication
-import com.forte.qqrobot.BotRuntime
 import com.forte.qqrobot.MsgParser
 import com.forte.qqrobot.MsgProcessor
 import com.forte.qqrobot.beans.messages.msgget.MsgGet
@@ -10,8 +9,10 @@ import com.forte.qqrobot.bot.BotManager
 import com.forte.qqrobot.bot.BotSender
 import com.forte.qqrobot.depend.DependCenter
 import com.forte.qqrobot.listener.invoker.ListenerManager
+import com.forte.qqrobot.log.QQLog
 import com.forte.qqrobot.sender.MsgSender
 import com.forte.qqrobot.sender.senderlist.RootSenderList
+import com.simplerobot.component.jcq.log.JCQLog
 import org.meowy.cqp.jcq.entity.CoolQ
 import java.util.function.Function
 
@@ -56,7 +57,7 @@ open class JCQApplication(
      * @param dependCenter  依赖中心
      * @return 组件的Context对象实例
      */
-    override fun getComponentContext(defaultMsgSender: MsgSender, manager: BotManager, msgParser: MsgParser, processor: MsgProcessor, dependCenter: DependCenter): JCQContext = JCQContext(sender, manager, msgParser, processor, dependCenter, cq)
+    override fun getComponentContext(defaultsenders: DefaultSenders<JCQSender, JCQSender, JCQSender>, manager: BotManager, msgParser: MsgParser, processor: MsgProcessor, dependCenter: DependCenter): JCQContext = JCQContext(sender, manager, msgParser, processor, dependCenter, cq)
 
 
     /**
@@ -77,7 +78,10 @@ open class JCQApplication(
      *
      * 暂时没啥好初始化的
      */
-    override fun resourceInit(config: JCQConfiguration) {}
+    override fun resourceInit(config: JCQConfiguration) {
+        // 为config中初始化一个bot信息以触发bot账号注册
+        config.registerBot(null, "Nothing but love")
+    }
 
     /**
      * 开发者实现的资源初始化
@@ -97,7 +101,7 @@ open class JCQApplication(
     override fun runServer(dependCenter: DependCenter, manager: ListenerManager, msgProcessor: MsgProcessor, msgParser: MsgParser) = "simple-JCQ"
 
     /**
-     * 验证？验证个锤子啊
+     * 验证？验证个锤子
      */
     override fun verifyBot(code: String?, info: BotInfo?): BotInfo = JCQBotInfo(sender.loginQQInfo, BotSender(sender), cq)
 
@@ -106,19 +110,6 @@ open class JCQApplication(
     private lateinit var defMsgSender: MsgSender
 
 
-    /**
-     * 获取一个不使用在监听函数中的默认送信器
-     * @param dependCenter 依赖中心
-     * @param manager      监听器管理中心
-     * @param botManager   bot管理中心
-     * @return
-     */
-    override fun getDefaultSender(dependCenter: DependCenter?, manager: ListenerManager?, botManager: BotManager?): MsgSender {
-        if (!::defMsgSender.isInitialized) {
-            defMsgSender = MsgSender.NoListenerMsgSender.build(sender, sender, sender, BotRuntime.getRuntime())
-        }
-        return defMsgSender;
-    }
 
     /**
      * 字符串转化为MsgGet的方法，最终会被转化为[MsgParser]函数，
@@ -128,6 +119,32 @@ open class JCQApplication(
      */
     @Deprecated("just use base data", ReplaceWith("null"))
     override fun msgParse(str: String?): MsgGet? = null
+
+    /**
+     * @see [getDefaultSenders]
+     */
+    override fun getDefaultSetter(botManager: BotManager?): JCQSender? = null
+
+    /**
+     * @see [getDefaultSenders]
+     */
+    override fun getDefaultGetter(botManager: BotManager?): JCQSender? = null
+
+    /**
+     * @see [getDefaultSenders]
+     */
+    override fun getDefaultSender(botManager: BotManager?): JCQSender? = null
+
+
+    /**
+     * 重写此方法后上述三个方法将不会被使用。
+     */
+    override fun getDefaultSenders(botManager: BotManager?): DefaultSenders<JCQSender, JCQSender, JCQSender> = DefaultSenders(sender, sender, sender);
+
+    override fun `_hello$`() {
+        QQLog.info("Love yourself, love this world")
+        JCQLog.info("Love this world, love yourself")
+    }
 
 
 }

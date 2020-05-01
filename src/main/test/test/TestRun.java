@@ -16,9 +16,9 @@ public class TestRun extends DebugJCQMain {
         testRun.privateMsg(1,1, 1, "msg!", 1);
         testRun.groupBan(1,1, 1, 1, 1, 1);
 
+
         testRun.disable();
         testRun.exit();
-
 
     }
 
