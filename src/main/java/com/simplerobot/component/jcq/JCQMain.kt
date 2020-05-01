@@ -127,11 +127,14 @@ abstract class JCQMain(CQ: CoolQ) : JcqAppAbstract(CQ), ICQVer, IMsg, IRequest, 
     open val appID: String
         get() = "${this::class.java.`package`.name}.${this::class.java.simpleName.decapitalize()}"
 
+    /** application 懒加载 */
+    val application by lazy { JCQApplication(CQ) }
+
     /** 初始化 */
     private fun initJCQComponent() {
         // 初始化
         if (!::context.isInitialized) {
-            context = JCQApplication(CQ).run(this)
+            context = application.run(this)
         }
     }
 
@@ -156,6 +159,7 @@ abstract class JCQMain(CQ: CoolQ) : JcqAppAbstract(CQ), ICQVer, IMsg, IRequest, 
     override fun exit(): Int {
         JCQLog.info("酷Q已终止")
         onExit()
+        application.close()
         return 0
     }
 

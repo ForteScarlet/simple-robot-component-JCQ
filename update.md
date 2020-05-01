@@ -1,3 +1,6 @@
+# now
+exit的时候触发application的close
+
 # 0.3.0-1.12
 - 更新核心至`1.12.1`
 - DebugJCQMain启动的时候默认使用debug日志

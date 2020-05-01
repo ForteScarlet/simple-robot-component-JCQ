@@ -68,7 +68,7 @@ open class JCQApplication(
 
 
     /** 没啥好close的 */
-    override fun close() {}
+    override fun close() { }
 
     /**
      * 开发者实现的资源初始化
