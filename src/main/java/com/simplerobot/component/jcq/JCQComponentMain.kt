@@ -27,6 +27,7 @@ open class JCQApplication(
         JCQSender,
         JCQSender,
         JCQSender,
+        JCQApplication,
         JCQContext
         >() {
 
@@ -48,17 +49,6 @@ open class JCQApplication(
      */
     override fun getRootSenderFunction(botManager: BotManager?): Function<MsgGet?, RootSenderList> = Function { sender }
 
-    /**
-     * 获取一个组件专属的SimpleRobotContext对象
-     * @param defaultMsgSender 函数[getDefaultSender]的最终返回值
-     * @param manager       botManager对象
-     * @param msgParser     消息字符串转化函数
-     * @param processor     消息处理器
-     * @param dependCenter  依赖中心
-     * @return 组件的Context对象实例
-     */
-    override fun getComponentContext(defaultMsgSender: MsgSender, manager: BotManager, msgParser: MsgParser, processor: MsgProcessor, dependCenter: DependCenter): JCQContext = JCQContext(sender, manager, msgParser, processor, dependCenter, cq)
-
 
     /**
      * 开发者实现的获取Config对象实例的方法
@@ -68,7 +58,7 @@ open class JCQApplication(
 
 
     /** 没啥好close的 */
-    override fun close() {}
+    override fun doClose() {}
 
     /**
      * 开发者实现的资源初始化
@@ -103,24 +93,6 @@ open class JCQApplication(
     override fun verifyBot(code: String?, info: BotInfo?): BotInfo = JCQBotInfo(sender.loginQQInfo, BotSender(sender))
 
 
-    /** 延迟初始化 默认送信器 */
-    private lateinit var defMsgSender: MsgSender
-
-
-    /**
-     * 获取一个不使用在监听函数中的默认送信器
-     * @param dependCenter 依赖中心
-     * @param manager      监听器管理中心
-     * @param botManager   bot管理中心
-     * @return
-     */
-    override fun getDefaultSender(dependCenter: DependCenter?, manager: ListenerManager?, botManager: BotManager?): MsgSender {
-        if (!::defMsgSender.isInitialized) {
-            defMsgSender = MsgSender.NoListenerMsgSender.build(sender, sender, sender, BotRuntime.getRuntime())
-        }
-        return defMsgSender;
-    }
-
     /**
      * 字符串转化为MsgGet的方法，最终会被转化为[MsgParser]函数，
      * 会作为参数传入[runServer], 也会封装进[JCQContext]中
@@ -129,6 +101,30 @@ open class JCQApplication(
      */
     @Deprecated("just use base data", ReplaceWith("null"))
     override fun msgParse(str: String?): MsgGet? = null
+
+    /**
+     * 获取一个组件专属的SimpleRobotContext对象
+     * @param defaultSenders 函数[.getDefaultSenders]的最终返回值
+     * @param manager       botManager对象
+     * @param msgParser     消息字符串转化函数
+     * @param processor     消息处理器
+     * @param dependCenter  依赖中心
+     * @return 组件的Context对象实例
+     */
+    override fun getComponentContext(defaultSenders: DefaultSenders<JCQSender, JCQSender, JCQSender>, manager: BotManager, msgParser: MsgParser, processor: MsgProcessor, dependCenter: DependCenter, config: JCQConfiguration): JCQContext {
+        return JCQContext(sender, manager, msgParser, processor, dependCenter, config, this)
+    }
+
+    /**
+     * get default senders
+     */
+    override fun getDefaultSenders(botManager: BotManager): DefaultSenders<JCQSender, JCQSender, JCQSender> {
+        return DefaultSenders(sender, sender, sender)
+    }
+
+    override fun getDefaultSender(botManager: BotManager?): JCQSender? = null
+    override fun getDefaultSetter(botManager: BotManager?): JCQSender? = null
+    override fun getDefaultGetter(botManager: BotManager?): JCQSender? = null
 
 
 }

@@ -57,7 +57,9 @@ open class JCQConfiguration : BaseConfiguration<JCQConfiguration>() {
         // 因此默认情况下，线程池的数量为1/1
         corePoolSize = 1
         maximumPoolSize = 1
+        this.registerBot("", "")
     }
+
 }
 
 /**
@@ -83,9 +85,11 @@ constructor(
         msgParser: MsgParser,
         processor: MsgProcessor,
         dependCenter: DependCenter,
+        configuration: JCQConfiguration,
+        application: JCQApplication,
         // CoolQ对象
         val cq: CoolQ = JcqApp.CQ
-) : SimpleRobotContext<JCQSender, JCQSender, JCQSender>(sender, sender, sender, manager, msgParser, processor, dependCenter)
+) : SimpleRobotContext<JCQSender, JCQSender, JCQSender, JCQConfiguration, JCQApplication>(sender, sender, sender, manager, msgParser, processor, dependCenter, configuration, application)
 
 
 /**

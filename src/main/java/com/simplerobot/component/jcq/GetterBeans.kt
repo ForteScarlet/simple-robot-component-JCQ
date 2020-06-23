@@ -80,9 +80,6 @@ data class JCQGroupMember(private val mi: Member) : JCQBaseBean(mi.toString()), 
     /** 群号  */
     override fun getGroup() = mi.groupId.toString()
 
-    /** QQ名  */
-    override fun getName() = mi.nick
-
     /** 等级对应名称  */
     override fun getLevelName() = mi.levelName
 
@@ -107,14 +104,23 @@ data class JCQGroupMember(private val mi: Member) : JCQBaseBean(mi.toString()), 
     /** 是否为不良用户  */
     override fun isBlack(): Boolean = mi.isBad
 
-    /** 获取群昵称  */
-    override fun getNickName(): String = mi.nick
-
     /** 所在城市  */
     override fun getCity(): String = mi.area
 
     /** 头像  */
     override fun getHeadUrl(): String = qqHeadUrl
+
+    /**
+     * 获取备注信息，例如群备注，或者好友备注。
+     * @return 备注信息
+     */
+    override fun getRemark(): String? = mi.card
+
+    /**
+     * 可以获取昵称
+     * @return nickname
+     */
+    override fun getNickname(): String? = mi.nick
 }
 
 
@@ -233,9 +239,6 @@ data class JCQStrangerInfo(private val info: QQInfo) :
     /** QQ号  */
     override fun getQQ(): String = info.qqId.toString()
 
-    /** 获取名称（昵称）  */
-    override fun getName(): String = info.nick
-
     /** 年龄  */
     override fun getAge(): Int = info.age
 
@@ -244,6 +247,18 @@ data class JCQStrangerInfo(private val info: QQInfo) :
 
     /** 等级  */
     override fun getLevel(): Int = -1
+
+    /**
+     * 获取备注信息，例如群备注，或者好友备注。
+     * @return 备注信息
+     */
+    override fun getRemark(): String? = nickname
+
+    /**
+     * 可以获取昵称
+     * @return nickname
+     */
+    override fun getNickname(): String? = info.nick
 }
 
 // ******************************* group member info ********************************** //
@@ -265,9 +280,6 @@ data class JCQGroupMemberInfo(private val gm: Member) :
 
     /** 群名片  */
     override fun getCard(): String = gm.card
-
-    /** qq昵称  */
-    override fun getName(): String = gm.nick
 
     /** 权限类型  */
     override fun getPowerType(): PowerType = powerInfo
@@ -300,14 +312,25 @@ data class JCQGroupMemberInfo(private val gm: Member) :
     /** 是否为不良用户  */
     override fun isBlack(): Boolean = gm.isBad
 
-    /** 群昵称  */
-    override fun getNickName(): String = gm.card
-
     /** 获取群号  */
     override fun getCode(): String = gm.groupId.toString()
 
     /** 所在城市  */
     override fun getCity(): String = gm.area
+
+
+    /**
+     * 获取备注信息，例如群备注，或者好友备注。
+     * @return 备注信息
+     */
+    override fun getRemark(): String? = gm.card
+
+    /**
+     * 可以获取昵称
+     * @return nickname
+     */
+    override fun getNickname(): String? = gm.nick
+
 }
 
 // ******************************* group file ********************************** //

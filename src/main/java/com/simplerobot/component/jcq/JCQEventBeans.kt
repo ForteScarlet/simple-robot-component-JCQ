@@ -4,6 +4,8 @@ import com.forte.qqrobot.beans.messages.OriginalAble
 import com.forte.qqrobot.beans.messages.msgget.*
 import com.forte.qqrobot.beans.messages.types.*
 import com.sobte.cqp.jcq.entity.GroupFile
+import com.sobte.cqp.jcq.entity.Member
+import com.sobte.cqp.jcq.entity.QQInfo
 import com.sobte.cqp.jcq.event.JcqApp
 
 /** 参数拼接为originalData */
@@ -56,6 +58,9 @@ open class JCQPrivateMsg(val subType: Int, val msgId: Int,
         BaseJCQMsg("JCQPrivateMsg",
                 "subType" to subType, "msgId" to msgId, "fromQQ" to fromQQ, "msg" to onMsg, "font" to font), PrivateMsg {
 
+    // info by lazy
+    private val strangerInfo: QQInfo by lazy { JcqApp.CQ.getStrangerInfo(fromQQ) }
+
     // 子类型，11/来自好友 1/来自在线状态 2/来自群 3/来自讨论组
     private val msgType: PrivateMsgType = when (subType) {
         11 -> PrivateMsgType.FROM_FRIEND
@@ -95,6 +100,17 @@ open class JCQPrivateMsg(val subType: Int, val msgId: Int,
      */
     override fun getMsg(): String? = onMsg
 
+    /**
+     * 获取备注信息，例如群备注，或者好友备注。
+     * @return 备注信息
+     */
+    override fun getRemark(): String? = nickname
+
+    /**
+     * 可以获取昵称
+     * @return nickname
+     */
+    override fun getNickname(): String = strangerInfo.nick
 }
 
 /**
@@ -109,6 +125,10 @@ open class JCQGroupMsg(
                 "subType" to subType, "msgId" to msgId, "fromGroup" to fromGroup,
                 "fromQQ" to fromQQ, "fromAnonymous" to fromAnonymous, "msg" to onMsg, "font" to font),
         GroupMsg {
+
+    // info by lazy
+    private val memberInfo: Member by lazy { JcqApp.CQ.getGroupMemberInfo(fromGroup, fromQQ) }
+
     /** 获取群消息发送人的qq号  */
     override fun getQQ(): String = fromQQ.toString()
 
@@ -159,6 +179,20 @@ open class JCQGroupMsg(
     /** 获取消息的字体  */
     override fun getFont(): String = font.toString()
 
+    /**
+     * 获取备注信息，例如群备注，或者好友备注。
+     * @return 备注信息
+     */
+    override fun getRemark(): String? {
+        val card: String? = memberInfo.card
+        return if(card != null && card.isBlank()) null else card
+    }
+
+    /**
+     * 可以获取昵称
+     * @return nickname
+     */
+    override fun getNickname(): String = memberInfo.nick
 }
 
 /**
@@ -172,6 +206,10 @@ open class JCQDiscussMsg(
                 "subType" to subType, "msgId" to msgId, "fromDiscuss" to fromDiscuss,
                 "fromQQ" to fromQQ, "msg" to onMsg, "font" to font),
         DiscussMsg {
+
+    // info by lazy
+    private val strangerInfo: QQInfo by lazy { JcqApp.CQ.getStrangerInfo(fromQQ) }
+
     /** 获取发消息的人的QQ  */
     override fun getQQ(): String = fromQQ.toString()
 
@@ -198,6 +236,18 @@ open class JCQDiscussMsg(
      * 如果不存在，则为null。（旧版本推荐为空字符串，现在不了。我变卦了）
      */
     override fun getMsg(): String? = onMsg
+
+    /**
+     * 获取备注信息，例如群备注，或者好友备注。
+     * @return 备注信息
+     */
+    override fun getRemark(): String = nickname
+
+    /**
+     * 可以获取昵称
+     * @return nickname
+     */
+    override fun getNickname(): String = strangerInfo.nick
 }
 
 open class JCQRequestAddFriend(
