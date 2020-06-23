@@ -4,6 +4,8 @@ import com.forte.qqrobot.beans.messages.OriginalAble
 import com.forte.qqrobot.beans.messages.msgget.*
 import com.forte.qqrobot.beans.messages.types.*
 import org.meowy.cqp.jcq.entity.GroupFile
+import org.meowy.cqp.jcq.entity.Member
+import org.meowy.cqp.jcq.entity.QQInfo
 
 /** 参数拼接为originalData */
 private fun toOriginal(name: String, vararg data: String?): String = "$name: ${data.joinToString(", ")}"
@@ -62,7 +64,7 @@ open class JCQPrivateMsg(sender: JCQSender, val subType: Int, val msgId: Int,
                 "subType" to subType, "msgId" to msgId, "fromQQ" to fromQQ, "msg" to onMsg, "font" to font), PrivateMsg {
 
     // info by lazy
-    private val strangerInfo: QQInfo by lazy { JcqApp.CQ.getStrangerInfo(fromQQ) }
+    private val strangerInfo: QQInfo by lazy { sender.cq.getStrangerInfo(fromQQ) }
 
     // 子类型，11/来自好友 1/来自在线状态 2/来自群 3/来自讨论组
     private val msgType: PrivateMsgType = when (subType) {
@@ -125,6 +127,9 @@ open class JCQGroupMsg(sender: JCQSender,
                 "subType" to subType, "msgId" to msgId, "fromGroup" to fromGroup,
                 "fromQQ" to fromQQ, "fromAnonymous" to fromAnonymous, "msg" to onMsg, "font" to font),
         GroupMsg {
+
+    private val memberInfo: Member by lazy { sender.cq.getGroupMemberInfo(fromGroup, fromQQ) }
+
     /** 获取群消息发送人的qq号  */
     override fun getQQ(): String = fromQQ.toString()
 
@@ -204,7 +209,7 @@ open class JCQDiscussMsg(sender: JCQSender,
         DiscussMsg {
 
     // info by lazy
-    private val strangerInfo: QQInfo by lazy { JcqApp.CQ.getStrangerInfo(fromQQ) }
+    private val strangerInfo: QQInfo by lazy { sender.cq.getStrangerInfo(fromQQ) }
 
     /** 获取发消息的人的QQ  */
     override fun getQQ(): String = fromQQ.toString()

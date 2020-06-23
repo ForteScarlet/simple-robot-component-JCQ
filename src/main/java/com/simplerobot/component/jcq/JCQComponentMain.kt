@@ -1,7 +1,6 @@
 package com.simplerobot.component.jcq
 
 import com.forte.qqrobot.BaseApplication
-import com.forte.qqrobot.BotRuntime
 import com.forte.qqrobot.MsgParser
 import com.forte.qqrobot.MsgProcessor
 import com.forte.qqrobot.beans.messages.msgget.MsgGet
@@ -12,8 +11,7 @@ import com.forte.qqrobot.depend.DependCenter
 import com.forte.qqrobot.listener.invoker.ListenerManager
 import com.forte.qqrobot.sender.MsgSender
 import com.forte.qqrobot.sender.senderlist.RootSenderList
-import com.sobte.cqp.jcq.entity.CoolQ
-import com.sobte.cqp.jcq.event.JcqApp
+import org.meowy.cqp.jcq.entity.CoolQ
 import java.util.function.Function
 
 /**
@@ -21,7 +19,7 @@ import java.util.function.Function
  */
 open class JCQApplication(
         // 启动时的唯一CoolQ对象
-        private val cq: CoolQ = JcqApp.CQ
+        private val cq: CoolQ
 ) : BaseApplication<
         JCQConfiguration,
         JCQSender,
@@ -48,17 +46,6 @@ open class JCQApplication(
      * 由于CoolQ静态唯一，所以送信器唯一
      */
     override fun getRootSenderFunction(botManager: BotManager?): Function<MsgGet?, RootSenderList> = Function { sender }
-
-    /**
-     * 获取一个组件专属的SimpleRobotContext对象
-     * @param defaultMsgSender 函数[getDefaultSender]的最终返回值
-     * @param manager       botManager对象
-     * @param msgParser     消息字符串转化函数
-     * @param processor     消息处理器
-     * @param dependCenter  依赖中心
-     * @return 组件的Context对象实例
-     */
-    override fun getComponentContext(defaultMsgSender: MsgSender, manager: BotManager, msgParser: MsgParser, processor: MsgProcessor, dependCenter: DependCenter): JCQContext = JCQContext(sender, manager, msgParser, processor, dependCenter, cq)
 
 
     /**
@@ -104,7 +91,7 @@ open class JCQApplication(
     /**
      * 验证？验证个锤子啊
      */
-    override fun verifyBot(code: String?, info: BotInfo?): BotInfo = JCQBotInfo(sender.loginQQInfo, BotSender(sender))
+    override fun verifyBot(code: String?, info: BotInfo?): BotInfo = JCQBotInfo(sender.loginQQInfo, BotSender(sender), cq)
 
 
     /** 延迟初始化 默认送信器 */
@@ -131,7 +118,7 @@ open class JCQApplication(
      * @return 组件的Context对象实例
      */
     override fun getComponentContext(defaultSenders: DefaultSenders<JCQSender, JCQSender, JCQSender>, manager: BotManager, msgParser: MsgParser, processor: MsgProcessor, dependCenter: DependCenter, config: JCQConfiguration): JCQContext {
-        return JCQContext(sender, manager, msgParser, processor, dependCenter, config, this)
+        return JCQContext(sender, manager, msgParser, processor, dependCenter, config, this, cq)
     }
 
     /**

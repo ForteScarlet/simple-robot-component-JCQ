@@ -12,8 +12,7 @@ import com.forte.qqrobot.depend.DependCenter
 import com.forte.qqrobot.sender.MsgSender
 import com.forte.qqrobot.sender.senderlist.BaseRootSenderList
 import com.forte.qqrobot.utils.CQCodeUtil
-import com.sobte.cqp.jcq.entity.*
-import com.sobte.cqp.jcq.event.JcqApp
+import org.meowy.cqp.jcq.entity.*
 
 /*
     扩展函数
@@ -87,14 +86,14 @@ constructor(
         configuration: JCQConfiguration,
         application: JCQApplication,
         // CoolQ对象
-        val cq: CoolQ = JcqApp.CQ
+        val cq: CoolQ
 ) : SimpleRobotContext<JCQSender, JCQSender, JCQSender, JCQConfiguration, JCQApplication>(sender, sender, sender, manager, msgParser, processor, dependCenter, configuration, application)
 
 
 /**
  * JCQBotInfo
  */
-open class JCQBotInfo(info: LoginInfo, botSender: BotSender, cq: CoolQ = JcqApp.CQ) : BotInfoImpl(info.code, cq.appDirectory, info, botSender)
+open class JCQBotInfo(info: LoginInfo, botSender: BotSender, cq: CoolQ) : BotInfoImpl(info.code, cq.appDirectory, info, botSender)
 
 
 /**
@@ -102,12 +101,11 @@ open class JCQBotInfo(info: LoginInfo, botSender: BotSender, cq: CoolQ = JcqApp.
  * 需要一个cq参数
  * CQ全局唯一，这个类基本上也可以算是全局唯一了
  */
-open class JCQSender
-@JvmOverloads
-constructor(private val cq: CoolQ = JcqApp.CQ) : BaseRootSenderList() {
+open class JCQSender(val cq: CoolQ) : BaseRootSenderList() {
+
+
 
     // 登录信息不再使用静态
-//    companion object {
         /** 登录信息 */
         private lateinit var _loginInfo: LoginInfo
         val loginInfo: LoginInfo
@@ -127,7 +125,6 @@ constructor(private val cq: CoolQ = JcqApp.CQ) : BaseRootSenderList() {
                 }
                 return _appDirectory
             }
-//    }
 
     /**
      * 发送讨论组消息
@@ -462,6 +459,22 @@ constructor(private val cq: CoolQ = JcqApp.CQ) : BaseRootSenderList() {
      * @see [CoolQ.logWarning]
      */
     fun logWarning(category: String?, content: String?) = cq.logWarning(category, content)
+
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as JCQSender
+
+        if (cq != other.cq) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return cq.hashCode()
+    }
 
 }
 

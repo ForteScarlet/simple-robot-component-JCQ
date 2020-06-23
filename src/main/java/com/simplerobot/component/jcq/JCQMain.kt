@@ -1,3 +1,5 @@
+@file:Suppress("MemberVisibilityCanBePrivate")
+
 package com.simplerobot.component.jcq
 
 import com.forte.lang.Language
@@ -128,7 +130,11 @@ abstract class JCQMain(CQ: CoolQ) : JcqAppAbstract(CQ), ICQVer, IMsg, IRequest, 
         get() = "${this::class.java.`package`.name}.${this::class.java.simpleName.decapitalize()}"
 
     /** application 懒加载 */
-    val application by lazy { JCQApplication(CQ) }
+    val application: JCQApplication by lazy { JCQApplication(CQ) }
+
+    /** sender */
+    val sender: JCQSender by lazy { JCQSender(CQ) }
+
 
     /** 初始化 */
     private fun initJCQComponent() {
@@ -250,7 +256,7 @@ abstract class JCQMain(CQ: CoolQ) : JcqAppAbstract(CQ), ICQVer, IMsg, IRequest, 
      * 注意：应用优先级设置为"最高"(10000)时，不得使用本返回值<br></br>
      * 如果不回复消息，交由之后的应用/过滤器处理，这里 返回  [MSG_IGNORE][com.sobte.cqp.jcq.entity.IMsg.MSG_IGNORE] - 忽略本条消息
      */
-    override fun privateMsg(subType: Int, msgId: Int, fromQQ: Long, msg: String?, font: Int): Int = processor.onMsgSelected(JCQPrivateMsg(context.realSender, subType, msgId, fromQQ, msg, font)).toResult()
+    override fun privateMsg(subType: Int, msgId: Int, fromQQ: Long, msg: String?, font: Int): Int = processor.onMsgSelected(JCQPrivateMsg(sender, subType, msgId, fromQQ, msg, font)).toResult()
 
     /**
      * 群事件-群禁言 (Type={@link IType#EVENT_System_GroupBan 104})<br>
@@ -264,7 +270,7 @@ abstract class JCQMain(CQ: CoolQ) : JcqAppAbstract(CQ), ICQVer, IMsg, IRequest, 
      * @param duration       禁言时长(单位 秒，仅子类型为2时可用)
      * @return 关于返回值说明, 见 {@link #privateMsg 私聊消息} 的方法
      */
-    override fun groupBan(subType: Int, sendTime: Int, fromGroup: Long, fromQQ: Long, beingOperateQQ: Long, duration: Long): Int = processor.onMsgSelected(JCQGroupBan(context.realSender, subType, sendTime.toLong(), fromGroup, fromQQ, beingOperateQQ, duration)).toResult()
+    override fun groupBan(subType: Int, sendTime: Int, fromGroup: Long, fromQQ: Long, beingOperateQQ: Long, duration: Long): Int = processor.onMsgSelected(JCQGroupBan(sender, subType, sendTime.toLong(), fromGroup, fromQQ, beingOperateQQ, duration)).toResult()
 
     /**
      * 群消息 (Type=[2][IType.EVENT_GroupMsg])<br></br>
@@ -279,7 +285,7 @@ abstract class JCQMain(CQ: CoolQ) : JcqAppAbstract(CQ), ICQVer, IMsg, IRequest, 
      * @param font          字体
      * @return 关于返回值说明, 见 [私聊消息][privateMsg] 的方法
      */
-    override fun groupMsg(subType: Int, msgId: Int, fromGroup: Long, fromQQ: Long, fromAnonymous: String?, msg: String?, font: Int): Int = processor.onMsgSelected(JCQGroupMsg(context.realSender, subType, msgId, fromGroup, fromQQ, fromAnonymous, msg, font)).toResult()
+    override fun groupMsg(subType: Int, msgId: Int, fromGroup: Long, fromQQ: Long, fromAnonymous: String?, msg: String?, font: Int): Int = processor.onMsgSelected(JCQGroupMsg(sender, subType, msgId, fromGroup, fromQQ, fromAnonymous, msg, font)).toResult()
 
     /**
      * 讨论组消息 (Type=[4][IType.EVENT_DiscussMsg])<br></br>
@@ -293,7 +299,7 @@ abstract class JCQMain(CQ: CoolQ) : JcqAppAbstract(CQ), ICQVer, IMsg, IRequest, 
      * @param font        字体
      * @return 关于返回值说明, 见 [私聊消息][privateMsg] 的方法
      */
-    override fun discussMsg(subType: Int, msgId: Int, fromDiscuss: Long, fromQQ: Long, msg: String?, font: Int): Int = processor.onMsgSelected(JCQDiscussMsg(context.realSender, subType, msgId, fromDiscuss, fromQQ, msg, font)).toResult()
+    override fun discussMsg(subType: Int, msgId: Int, fromDiscuss: Long, fromQQ: Long, msg: String?, font: Int): Int = processor.onMsgSelected(JCQDiscussMsg(sender, subType, msgId, fromDiscuss, fromQQ, msg, font)).toResult()
 
 
     /**
@@ -307,7 +313,7 @@ abstract class JCQMain(CQ: CoolQ) : JcqAppAbstract(CQ), ICQVer, IMsg, IRequest, 
      * @param responseFlag 反馈标识(处理请求用)
      * @return 关于返回值说明, 见 [私聊消息][privateMsg] 的方法
      */
-    override fun requestAddFriend(subType: Int, sendTime: Int, fromQQ: Long, msg: String?, responseFlag: String): Int = processor.onMsgSelected(JCQRequestAddFriend(context.realSender, subType, sendTime.toLong(), fromQQ, msg, responseFlag)).toResult()
+    override fun requestAddFriend(subType: Int, sendTime: Int, fromQQ: Long, msg: String?, responseFlag: String): Int = processor.onMsgSelected(JCQRequestAddFriend(sender, subType, sendTime.toLong(), fromQQ, msg, responseFlag)).toResult()
 
     /**
      * 群文件上传事件 (Type=[11][IType.EVENT_GroupUpload])<br></br>
@@ -320,7 +326,7 @@ abstract class JCQMain(CQ: CoolQ) : JcqAppAbstract(CQ), ICQVer, IMsg, IRequest, 
      * @param file      上传文件信息
      * @return 关于返回值说明, 见 [私聊消息][privateMsg] 的方法
      */
-    override fun groupUpload(subType: Int, sendTime: Int, fromGroup: Long, fromQQ: Long, file: String): Int = processor.onMsgSelected(JCQGroupUpload(context.realSender, subType, sendTime.toLong(), fromGroup, fromQQ, file)).toResult()
+    override fun groupUpload(subType: Int, sendTime: Int, fromGroup: Long, fromQQ: Long, file: String): Int = processor.onMsgSelected(JCQGroupUpload(sender, subType, sendTime.toLong(), fromGroup, fromQQ, file)).toResult()
 
     /**
      * 群事件-群成员减少 (Type=[102][IType.EVENT_System_GroupMemberDecrease])<br></br>
@@ -333,7 +339,7 @@ abstract class JCQMain(CQ: CoolQ) : JcqAppAbstract(CQ), ICQVer, IMsg, IRequest, 
      * @param beingOperateQQ 被操作QQ
      * @return 关于返回值说明, 见 [私聊消息][.privateMsg] 的方法
      */
-    override fun groupMemberDecrease(subType: Int, sendTime: Int, fromGroup: Long, fromQQ: Long, beingOperateQQ: Long): Int = processor.onMsgSelected(JCQGroupMemberDecrease(context.realSender, subType, sendTime.toLong(), fromGroup, fromQQ, beingOperateQQ)).toResult()
+    override fun groupMemberDecrease(subType: Int, sendTime: Int, fromGroup: Long, fromQQ: Long, beingOperateQQ: Long): Int = processor.onMsgSelected(JCQGroupMemberDecrease(sender, subType, sendTime.toLong(), fromGroup, fromQQ, beingOperateQQ)).toResult()
 
 
     /**
@@ -346,7 +352,7 @@ abstract class JCQMain(CQ: CoolQ) : JcqAppAbstract(CQ), ICQVer, IMsg, IRequest, 
      * @param beingOperateQQ 被操作QQ
      * @return 关于返回值说明, 见 [私聊消息][.privateMsg] 的方法
      */
-    override fun groupAdmin(subType: Int, sendTime: Int, fromGroup: Long, beingOperateQQ: Long): Int = processor.onMsgSelected(JCQGroupAdmin(context.realSender, subType, sendTime.toLong(), fromGroup, beingOperateQQ)).toResult()
+    override fun groupAdmin(subType: Int, sendTime: Int, fromGroup: Long, beingOperateQQ: Long): Int = processor.onMsgSelected(JCQGroupAdmin(sender, subType, sendTime.toLong(), fromGroup, beingOperateQQ)).toResult()
 
     /**
      * 群事件-群成员增加 (Type=[103][IType.EVENT_System_GroupMemberIncrease])<br></br>
@@ -359,7 +365,7 @@ abstract class JCQMain(CQ: CoolQ) : JcqAppAbstract(CQ), ICQVer, IMsg, IRequest, 
      * @param beingOperateQQ 被操作QQ(即加群的QQ)
      * @return 关于返回值说明, 见 [私聊消息][.privateMsg] 的方法
      */
-    override fun groupMemberIncrease(subType: Int, sendTime: Int, fromGroup: Long, fromQQ: Long, beingOperateQQ: Long): Int = processor.onMsgSelected(JCQGroupMemberIncrease(context.realSender, subType, sendTime.toLong(), fromGroup, fromQQ, beingOperateQQ)).toResult()
+    override fun groupMemberIncrease(subType: Int, sendTime: Int, fromGroup: Long, fromQQ: Long, beingOperateQQ: Long): Int = processor.onMsgSelected(JCQGroupMemberIncrease(sender, subType, sendTime.toLong(), fromGroup, fromQQ, beingOperateQQ)).toResult()
 
     /**
      * 请求-群添加 (Type=[302][IType.EVENT_Request_AddGroup])<br></br>
@@ -373,7 +379,7 @@ abstract class JCQMain(CQ: CoolQ) : JcqAppAbstract(CQ), ICQVer, IMsg, IRequest, 
      * @param responseFlag 反馈标识(处理请求用)
      * @return 关于返回值说明, 见 [私聊消息][.privateMsg] 的方法
      */
-    override fun requestAddGroup(subType: Int, sendTime: Int, fromGroup: Long, fromQQ: Long, msg: String?, responseFlag: String): Int = processor.onMsgSelected(JCQRequestAddGroup(context.realSender, subType, sendTime.toLong(), fromGroup, fromQQ, msg, responseFlag)).toResult()
+    override fun requestAddGroup(subType: Int, sendTime: Int, fromGroup: Long, fromQQ: Long, msg: String?, responseFlag: String): Int = processor.onMsgSelected(JCQRequestAddGroup(sender, subType, sendTime.toLong(), fromGroup, fromQQ, msg, responseFlag)).toResult()
 
     /**
      * 好友事件-好友已添加 (Type=[201][IType.EVENT_Friend_Add])<br></br>
@@ -384,5 +390,5 @@ abstract class JCQMain(CQ: CoolQ) : JcqAppAbstract(CQ), ICQVer, IMsg, IRequest, 
      * @param fromQQ   来源QQ
      * @return 关于返回值说明, 见 [私聊消息][.privateMsg] 的方法
      */
-    override fun friendAdd(subType: Int, sendTime: Int, fromQQ: Long): Int = processor.onMsgSelected(JCQFriendAdd(context.realSender, subType, sendTime.toLong(), fromQQ)).toResult()
+    override fun friendAdd(subType: Int, sendTime: Int, fromQQ: Long): Int = processor.onMsgSelected(JCQFriendAdd(sender, subType, sendTime.toLong(), fromQQ)).toResult()
 }
