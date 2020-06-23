@@ -59,7 +59,6 @@ open class JCQConfiguration : BaseConfiguration<JCQConfiguration>() {
         maximumPoolSize = 1
         this.registerBot("", "")
     }
-
 }
 
 /**
@@ -107,29 +106,28 @@ open class JCQSender
 @JvmOverloads
 constructor(private val cq: CoolQ = JcqApp.CQ) : BaseRootSenderList() {
 
-    companion object {
-        /** 登录信息, 唯一 */
+    // 登录信息不再使用静态
+//    companion object {
+        /** 登录信息 */
         private lateinit var _loginInfo: LoginInfo
-        @JvmStatic
         val loginInfo: LoginInfo
             get() {
                 if (!::_loginInfo.isInitialized) {
-                    _loginInfo = JCQLoginInfo(JcqApp.CQ.loginNick, JcqApp.CQ.loginQQ)
+                    _loginInfo = JCQLoginInfo(cq.loginNick, cq.loginQQ)
                 }
                 return _loginInfo
             }
 
-        /** 登录信息, 唯一 */
+        /** app目录 */
         private lateinit var _appDirectory: String
-        @JvmStatic
         val appDir: String
             get() {
                 if (!::_appDirectory.isInitialized) {
-                    _appDirectory = JcqApp.CQ.appDirectory
+                    _appDirectory = cq.appDirectory
                 }
                 return _appDirectory
             }
-    }
+//    }
 
     /**
      * 发送讨论组消息

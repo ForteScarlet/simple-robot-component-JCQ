@@ -26,7 +26,7 @@
     <dependencies>
         <!-- jcq -->
         <dependency>
-            <groupId>com.sobte.cqp</groupId>
+            <groupId>org.meowy.cqp</groupId>
             <artifactId>jcq-coolq</artifactId>
             <version>${jcq.version}</version>
         </dependency>

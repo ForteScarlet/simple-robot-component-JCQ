@@ -49,6 +49,17 @@ open class JCQApplication(
      */
     override fun getRootSenderFunction(botManager: BotManager?): Function<MsgGet?, RootSenderList> = Function { sender }
 
+    /**
+     * 获取一个组件专属的SimpleRobotContext对象
+     * @param defaultMsgSender 函数[getDefaultSender]的最终返回值
+     * @param manager       botManager对象
+     * @param msgParser     消息字符串转化函数
+     * @param processor     消息处理器
+     * @param dependCenter  依赖中心
+     * @return 组件的Context对象实例
+     */
+    override fun getComponentContext(defaultMsgSender: MsgSender, manager: BotManager, msgParser: MsgParser, processor: MsgProcessor, dependCenter: DependCenter): JCQContext = JCQContext(sender, manager, msgParser, processor, dependCenter, cq)
+
 
     /**
      * 开发者实现的获取Config对象实例的方法
@@ -68,7 +79,10 @@ open class JCQApplication(
      *
      * 暂时没啥好初始化的
      */
-    override fun resourceInit(config: JCQConfiguration) {}
+    override fun resourceInit(config: JCQConfiguration) {
+        // 为config中初始化一个bot信息以触发bot账号注册
+        config.registerBot(null, "Nothing but love")
+    }
 
     /**
      * 开发者实现的资源初始化
@@ -91,6 +105,11 @@ open class JCQApplication(
      * 验证？验证个锤子啊
      */
     override fun verifyBot(code: String?, info: BotInfo?): BotInfo = JCQBotInfo(sender.loginQQInfo, BotSender(sender))
+
+
+    /** 延迟初始化 默认送信器 */
+    private lateinit var defMsgSender: MsgSender
+
 
 
     /**

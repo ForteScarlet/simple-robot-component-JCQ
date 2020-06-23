@@ -3,23 +3,26 @@ package com.simplerobot.component.jcq
 import com.forte.qqrobot.beans.messages.OriginalAble
 import com.forte.qqrobot.beans.messages.msgget.*
 import com.forte.qqrobot.beans.messages.types.*
-import com.sobte.cqp.jcq.entity.GroupFile
-import com.sobte.cqp.jcq.entity.Member
-import com.sobte.cqp.jcq.entity.QQInfo
-import com.sobte.cqp.jcq.event.JcqApp
+import org.meowy.cqp.jcq.entity.GroupFile
 
 /** 参数拼接为originalData */
 private fun toOriginal(name: String, vararg data: String?): String = "$name: ${data.joinToString(", ")}"
 
 /** 参数拼接为originalData */
-private fun toOriginal(name: String, vararg data: Pair<String, Any?>): String = "$name: ${data.map { "${it.first}=${it.second}" }.joinToString(", ")}"
+private fun toOriginal(name: String, vararg data: Pair<String, Any?>): String = "$name(${data.map { "${it.first}=${it.second}" }.joinToString(", ")})"
+
+/** 子类型，1/被解禁 2/被禁言 */
+fun Int.toBanType(): GroupBanType = when(this){
+    1 -> GroupBanType.LIFT_BAN
+    else -> GroupBanType.BAN
+}
 
 /**
  * Event继承抽象类，默认实现了一些公共方法
  */
-abstract class BaseJCQMsg(private val original: String) : OriginalAble {
-    constructor(name: String, vararg data: Pair<String, Any?>) : this(toOriginal(name, *data))
-    constructor(name: String, vararg data: String?) : this(toOriginal(name, *data))
+abstract class BaseJCQMsg(protected val sender: JCQSender, private val original: String) : OriginalAble {
+    constructor(sender: JCQSender, name: String, vararg data: Pair<String, Any?>) : this(sender, toOriginal(name, *data))
+    constructor(sender: JCQSender, name: String, vararg data: String?) : this(sender, toOriginal(name, *data))
 
     /** 接收到消息的时候的毫秒值 */
     protected open val onTime = System.currentTimeMillis()
@@ -43,7 +46,7 @@ abstract class BaseJCQMsg(private val original: String) : OriginalAble {
      * @return 接收到此消息的账号。
      */
     @Deprecated("meaningless", ReplaceWith("JCQSender.loginInfo.code"))
-    open fun getThisCode(): String = JCQSender.loginInfo.code
+    open fun getThisCode(): String = sender.loginInfo.code
 
     /** 获取到的时间, 代表某一时间的秒值。一般情况下是秒值。如果类型不对请自行转化  */
     open fun getTime(): Long = onTime
@@ -52,10 +55,10 @@ abstract class BaseJCQMsg(private val original: String) : OriginalAble {
 /**
  * JCQ 私信消息事件
  */
-open class JCQPrivateMsg(val subType: Int, val msgId: Int,
+open class JCQPrivateMsg(sender: JCQSender, val subType: Int, val msgId: Int,
                          val fromQQ: Long, private var onMsg: String?,
                          val font: Int) :
-        BaseJCQMsg("JCQPrivateMsg",
+        BaseJCQMsg(sender, "JCQPrivateMsg",
                 "subType" to subType, "msgId" to msgId, "fromQQ" to fromQQ, "msg" to onMsg, "font" to font), PrivateMsg {
 
     // info by lazy
@@ -72,9 +75,6 @@ open class JCQPrivateMsg(val subType: Int, val msgId: Int,
 
     /** 获取发送人的QQ号  */
     override fun getQQ(): String = fromQQ.toString()
-
-    /** 获取原本的数据 originalData  */
-    override fun getOriginalData(): String = toString()
 
     /** 获取ID, 一般用于消息类型判断  */
     override fun getId(): String = msgId.toString()
@@ -116,19 +116,15 @@ open class JCQPrivateMsg(val subType: Int, val msgId: Int,
 /**
  * 群消息
  */
-open class JCQGroupMsg(
-        subType: Int, val msgId: Int, val fromGroup: Long,
+open class JCQGroupMsg(sender: JCQSender,
+                       subType: Int, val msgId: Int, val fromGroup: Long,
         val fromQQ: Long, val fromAnonymous: String?, private var onMsg: String?,
         val font: Int
 ) :
-        BaseJCQMsg("JCQGroupMsg",
+        BaseJCQMsg(sender, "JCQGroupMsg",
                 "subType" to subType, "msgId" to msgId, "fromGroup" to fromGroup,
                 "fromQQ" to fromQQ, "fromAnonymous" to fromAnonymous, "msg" to onMsg, "font" to font),
         GroupMsg {
-
-    // info by lazy
-    private val memberInfo: Member by lazy { JcqApp.CQ.getGroupMemberInfo(fromGroup, fromQQ) }
-
     /** 获取群消息发送人的qq号  */
     override fun getQQ(): String = fromQQ.toString()
 
@@ -198,11 +194,11 @@ open class JCQGroupMsg(
 /**
  * 讨论组消息
  */
-open class JCQDiscussMsg(
-        subType: Int, val msgId: Int, val fromDiscuss: Long, val fromQQ: Long,
+open class JCQDiscussMsg(sender: JCQSender,
+                         subType: Int, val msgId: Int, val fromDiscuss: Long, val fromQQ: Long,
         private var onMsg: String?, val font: Int
 ) :
-        BaseJCQMsg("JCQDiscussMsg",
+        BaseJCQMsg(sender, "JCQDiscussMsg",
                 "subType" to subType, "msgId" to msgId, "fromDiscuss" to fromDiscuss,
                 "fromQQ" to fromQQ, "msg" to onMsg, "font" to font),
         DiscussMsg {
@@ -250,11 +246,11 @@ open class JCQDiscussMsg(
     override fun getNickname(): String = strangerInfo.nick
 }
 
-open class JCQRequestAddFriend(
-        subType: Int, override val onTime: Long, val fromQQ: Long,
+open class JCQRequestAddFriend(sender: JCQSender,
+                               subType: Int, override val onTime: Long, val fromQQ: Long,
         private var onMsg: String?, val responseFlag: String
 ) :
-        BaseJCQMsg("JCQRequestAddFriend",
+        BaseJCQMsg(sender, "JCQRequestAddFriend",
                 "subType" to subType, "sendTime" to onTime,
                 "fromQQ" to fromQQ, "msg" to onMsg, "responseFlag" to responseFlag),
         FriendAddRequest {
@@ -275,11 +271,11 @@ open class JCQRequestAddFriend(
     }
 }
 
-open class JCQGroupUpload(
-        val subType: Int, override val onTime: Long, val fromGroup: Long,
+open class JCQGroupUpload(sender: JCQSender,
+                          val subType: Int, override val onTime: Long, val fromGroup: Long,
         val fromQQ: Long, val file: String
 ) :
-        BaseJCQMsg("JCQGroupUpload",
+        BaseJCQMsg(sender, "JCQGroupUpload",
                 "subType" to subType, "sendTime" to onTime,
                 "fromGroup" to fromGroup, "fromQQ" to fromQQ,
                 "file" to file),
@@ -292,7 +288,7 @@ open class JCQGroupUpload(
         get() {
             // 还没有初始化
             if (!::_fileInfo.isInitialized) {
-                _fileInfo = JcqApp.CQ.getGroupFile(file)
+                _fileInfo = sender.cq.getGroupFile(file)
             }
             return _fileInfo
         }
@@ -321,11 +317,11 @@ open class JCQGroupUpload(
 /**
  * 群成员减少事件
  */
-open class JCQGroupMemberDecrease(
-        val subType: Int, override val onTime: Long, val fromGroup: Long,
+open class JCQGroupMemberDecrease(sender: JCQSender,
+                                  val subType: Int, override val onTime: Long, val fromGroup: Long,
         val fromQQ: Long, val beingOperateQQ: Long
 ) :
-        BaseJCQMsg("JCQGroupUpload",
+        BaseJCQMsg(sender, "JCQGroupUpload",
                 "subType" to subType, "sendTime" to onTime,
                 "fromGroup" to fromGroup, "fromQQ" to fromQQ,
                 "beingOperateQQ" to beingOperateQQ),
@@ -356,11 +352,11 @@ open class JCQGroupMemberDecrease(
 /**
  * 群事件-管理员变动
  */
-open class JCQGroupAdmin(
-        val subType: Int, override val onTime: Long,
+open class JCQGroupAdmin(sender: JCQSender,
+                         val subType: Int, override val onTime: Long,
         val fromGroup: Long, val beingOperateQQ: Long
 ) :
-        BaseJCQMsg("JCQGroupAdmin",
+        BaseJCQMsg(sender, "JCQGroupAdmin",
                 "subType" to subType, "sendTime" to onTime,
                 "fromGroup" to fromGroup, "beingOperateQQ" to beingOperateQQ),
         GroupAdminChange {
@@ -392,11 +388,11 @@ open class JCQGroupAdmin(
 /**
  * 群事件-群成员增加
  */
-open class JCQGroupMemberIncrease(
-        val subType: Int, override val onTime: Long, val fromGroup: Long,
+open class JCQGroupMemberIncrease(sender: JCQSender,
+                                  val subType: Int, override val onTime: Long, val fromGroup: Long,
         val fromQQ: Long, val beingOperateQQ: Long
 ) :
-        BaseJCQMsg("JCQGroupMemberIncrease",
+        BaseJCQMsg(sender, "JCQGroupMemberIncrease",
                 "subType" to subType, "sendTime" to onTime,
                 "fromGroup" to fromGroup, "beingOperateQQ" to beingOperateQQ),
         GroupMemberIncrease {
@@ -426,11 +422,11 @@ open class JCQGroupMemberIncrease(
 /**
  * 请求-群添加
  */
-open class JCQRequestAddGroup(
-        val subType: Int, override val onTime: Long, val fromGroup: Long,
+open class JCQRequestAddGroup(sender: JCQSender,
+                              val subType: Int, override val onTime: Long, val fromGroup: Long,
         val fromQQ: Long, private val onMsg: String?, val responseFlag: String
 ) :
-        BaseJCQMsg("JCQRequestAddGroup",
+        BaseJCQMsg(sender, "JCQRequestAddGroup",
                 "subType" to subType, "sendTime" to onTime,
                 "fromGroup" to fromGroup, "fromQQ" to fromQQ, "msg" to onMsg, "responseFlag" to responseFlag),
         GroupAddRequest {
@@ -460,11 +456,13 @@ open class JCQRequestAddGroup(
     override fun getFlag(): String = responseFlag
 }
 
-
-open class JCQFriendAdd(
-        val subType: Int, override val onTime: Long, val fromQQ: Long
+/**
+ * 好友添加事件
+ */
+open class JCQFriendAdd(sender: JCQSender,
+                        val subType: Int, override val onTime: Long, val fromQQ: Long
 ) :
-        BaseJCQMsg("JCQFriendAdd",
+        BaseJCQMsg(sender, "JCQFriendAdd",
                 "subType" to subType,
                 "sendTime" to onTime, "fromQQ" to fromQQ),
         FriendAdd {
@@ -475,3 +473,35 @@ open class JCQFriendAdd(
     override fun getId(): String = "$subType.$onTime.$fromQQ"
 
 }
+
+/**
+ * 群禁言事件
+ */
+open class JCQGroupBan(sender: JCQSender,
+                       val subType: Int, override val onTime: Long,
+                       val fromGroup: Long, val fromQQ: Long,
+                       val beingOperateQQ: Long, val duration: Long
+                       ):
+        BaseJCQMsg(sender, "JCQGroupBan",
+                "subType" to subType, "sendTime" to onTime,
+                "fromGroup" to fromGroup, "fromQQ" to fromQQ,
+                "beingOperateQQ" to beingOperateQQ, "duration" to duration
+                ), GroupBan {
+
+
+    override fun getBeOperatedQQ(): String = beingOperateQQ.toString()
+
+    override fun getGroup(): String = fromGroup.toString()
+
+    override fun getId(): String = "$subType.$onTime.$fromQQ.$duration"
+
+    /** duration  禁言时长(单位 秒，仅子类型为2时可用) */
+    override fun time(): Long = duration
+
+    override fun getOperatorQQ(): String = operatorQQ.toString()
+
+    /** 子类型，1/被解禁 2/被禁言 */
+    override fun getBanType(): GroupBanType = subType.toBanType()
+
+}
+

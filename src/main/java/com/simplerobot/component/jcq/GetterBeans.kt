@@ -6,7 +6,9 @@ import com.forte.qqrobot.beans.messages.result.inner.GroupMember
 import com.forte.qqrobot.beans.messages.types.PowerType
 import com.forte.qqrobot.beans.messages.types.SexType
 import com.forte.qqrobot.bot.LoginInfo
-import com.sobte.cqp.jcq.entity.*
+import org.meowy.cqp.jcq.entity.*
+import org.meowy.cqp.jcq.entity.enumerate.Authority
+import org.meowy.cqp.jcq.entity.enumerate.Gender
 import com.forte.qqrobot.beans.messages.result.inner.Group as SimGroup
 
 /*
@@ -16,18 +18,18 @@ import com.forte.qqrobot.beans.messages.result.inner.Group as SimGroup
 /**
  * 权限信息，一般都是1（或其他）/成员 2/管理员 3/群主
  */
-private fun Int.toPowerType() = when (this) {
-    2 -> PowerType.ADMIN
-    3 -> PowerType.OWNER
+private fun Authority.toPowerType() = when (this) {
+    Authority.ADMIN -> PowerType.ADMIN
+    Authority.OWNER -> PowerType.OWNER
     else -> PowerType.MEMBER
 }
 
 /**
  * 性别信息，一般都是1/成员 2/管理员 3/群主
  */
-private fun Int.toSexType() = when (this) {
-    0 -> SexType.MALE
-    1 -> SexType.FEMALE
+private fun Gender.toSexType() = when (this) {
+    Gender.MALE -> SexType.MALE
+    Gender.FEMALE -> SexType.FEMALE
     else -> SexType.UNKNOWN
 }
 
